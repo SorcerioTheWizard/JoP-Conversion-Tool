@@ -10,7 +10,7 @@ from math import floor
 import nbtlib
 from PIL import Image
 
-from .Shared import intToHex, hexToInt, fullpath, tileGridIndices, averageColor
+from .Shared import intToHex, hexToInt, fullpath, tileGridIndices, averageColor, constrainToPowerOfTwo
 
 # Enums
 class JopCanvasType(Enum):
@@ -64,7 +64,7 @@ class JopImage:
         canvasType: The type of canvas used in the image.
         author: The name of the author of the image.
         title: The title of the image.
-        pixels: A list of hexadecimal strings representing the colors of the pixels in the image.
+        pixels: A list of hexadecimal strings representing the colors of the pixels in the image. The represented image _must_ have dimensions that are a power of 2.
         name: The UUID and Unix Timestamp identifier of the image like `<uuid>_<timestamp>`. If `None` is provided, the `_ROOT_UUID` and current Unix Timestamp will be used.
         """
         # Set the core properties
@@ -124,7 +124,7 @@ class JopImage:
         """
         Loads a standard image file and converts it to a Joy of Painting image.
 
-        image: A PIL Image object.
+        image: A PIL Image object. For best results, input an image with dimensions that are a power of 2. The image will be resized to the nearest power of 2 before conversion if necessary.
         canvas: The type of canvas to use for the image. It is recommended to use a canvas type that matches the aspect ratio of the image.
         title: The title of the image.
         author: The name of the author of the image.
@@ -136,40 +136,42 @@ class JopImage:
         if name is None:
             name = f"{cls._ROOT_UUID}_{int(time())}"
 
-        # Get sizes
-        origSize = image.size
-        canvasSize = canvas.getSize()
+        # Make sure the image is a power of 2
+        with constrainToPowerOfTwo(image) as imageSized:
+            # Get sizes
+            origSize = imageSized.size
+            canvasSize = canvas.getSize()
 
-        # Calculate tile size size
-        tileSize = (
-            floor(origSize[0] / canvasSize[0]),
-            floor(origSize[1] / canvasSize[1])
-        )
+            # Calculate tile size size
+            tileSize = (
+                floor(origSize[0] / canvasSize[0]),
+                floor(origSize[1] / canvasSize[1])
+            )
 
-        # Calculate the grid indices
-        gridIndices = tileGridIndices(origSize, tileSize, startAtZero=True)
+            # Calculate the grid indices
+            gridIndices = tileGridIndices(origSize, tileSize, startAtZero=True)
 
-        # Loop through the grid
-        pixels = []
-        for gridRow in gridIndices:
-            for gridTopLeft in gridRow:
-                # Calculate the grid bounding box
-                gridBtmRight = (
-                    gridTopLeft[0] + tileSize[0],
-                    gridTopLeft[1] + tileSize[1]
-                )
-                gridBB = (gridTopLeft[0], gridTopLeft[1], gridBtmRight[0], gridBtmRight[1])
+            # Loop through the grid
+            pixels = []
+            for gridRow in gridIndices:
+                for gridTopLeft in gridRow:
+                    # Calculate the grid bounding box
+                    gridBtmRight = (
+                        gridTopLeft[0] + tileSize[0],
+                        gridTopLeft[1] + tileSize[1]
+                    )
+                    gridBB = (gridTopLeft[0], gridTopLeft[1], gridBtmRight[0], gridBtmRight[1])
 
-                # Get the average color
-                with image.crop(gridBB) as gridSquare:
-                    # Calculate the average color
-                    avgColor = averageColor(gridSquare)
+                    # Get the average color
+                    with imageSized.crop(gridBB) as gridSquare:
+                        # Calculate the average color
+                        avgColor = averageColor(gridSquare)
 
-                    # Convert to hex
-                    colorHex = "%02x%02x%02x" % avgColor
+                        # Convert to hex
+                        colorHex = "%02x%02x%02x" % avgColor
 
-                    # Record the color
-                    pixels.append(colorHex)
+                        # Record the color
+                        pixels.append(colorHex)
 
         # Build the object
         return cls(
@@ -192,7 +194,7 @@ class JopImage:
         """
         Loads a standard image file and converts it to a Joy of Painting image.
 
-        path: The path to a standard image file.
+        path: The path to a standard image file. For best results, input an image with dimensions that are a power of 2. The image will be resized to the nearest power of 2 before conversion if necessary.
         canvas: The type of canvas to use for the image. It is recommended to use a canvas type that matches the aspect ratio of the image.
         title: The title of the image.
         author: The name of the author of the image.

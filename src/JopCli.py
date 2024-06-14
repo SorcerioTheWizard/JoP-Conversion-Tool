@@ -39,7 +39,7 @@ def runJopCli():
     # Setup the import parser
     importParser = subparsers.add_parser(_KEY_COMMAND_IMPORT, help="Convert a standard image file to a Joy of Painting `.paint` format.")
 
-    importParser.add_argument("inPath", type=str, help="An input file path pointing to a standard image file.")
+    importParser.add_argument("inPath", type=str, help="An input file path pointing to a standard image file. For best results, input an image with dimensions that are a power of 2. The image will be resized to the nearest power of 2 before conversion if necessary.")
     importParser.add_argument("outPath", type=str, help="An output file path to save the converted Joy of Painting `.paint` file to with the `.paint` extension.")
 
     importParser.add_argument("-t", "--title", type=str, help="The title of the image.", default="Untitled")
@@ -97,7 +97,7 @@ def runJopCli():
                 jopImage.saveImage(previewPath, previewSize)
 
                 # Report
-                print(f"Exported {os.path.basename(args.inPath)} to: {args.outPath}")
+                print(f"Exported {os.path.basename(args.inPath)} preview to: {previewPath}")
 
 # Command Line
 if __name__ == "__main__":

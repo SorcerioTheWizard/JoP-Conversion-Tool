@@ -101,6 +101,28 @@ def averageColor(image: Image.Image) -> tuple[int, int, int]:
         round(avgColor[2])
     )
 
+def constrainToPowerOfTwo(image: Image.Image, resample: Image.Resampling = Image.Resampling.NEAREST) -> Image.Image:
+    """
+    Constrains the width and height of the image to the nearest respective power of 2.
+
+    image: A PIL Image.
+    resample: The resampling filter to use when resizing the image.
+
+    Returns a new PIL Image with the constrained dimensions. If no change is necessary, a copy of the original image is returned.
+    """
+    # Get the image size
+    width, height = image.size
+
+    # Check if the image is already a power of 2
+    if ((width & (width - 1)) == 0) and ((height & (height - 1)) == 0):
+        return image.copy()
+
+    # Calculate the nearest power of 2 for width and height
+    newWidth = (2 ** int(np.ceil(np.log2(width))))
+    newHeight = (2 ** int(np.ceil(np.log2(height))))
+
+    return image.resize((newWidth, newHeight), resample=resample)
+
 # Command Line
 if __name__ == "__main__":
     print("No command line exists for this file.")
