@@ -41,6 +41,67 @@ class JopMultiBlockImage:
             print("The names of JopImage objects in the grid are not unique!\nIssues will occur when importing into Minecraft!")
 
     @classmethod
+    def fromImage(
+        cls: "JopMultiBlockImage",
+        gridSize: tuple[int, int],
+        image: Image.Image,
+        title: str,
+        author: str,
+        canvas: JopCanvasType = JopCanvasType.LARGE
+    ) -> "JopMultiBlockImage":
+        """
+        Accepts a PIL Image and converts its grid components into a set of Joy of Painting images.
+
+        gridSize: The size of the grid as a tuple of `(width, height)` where each cell is a Joy of Painting Large Canvas. A size of `(2, 2)` would create a 4 Large Canvas grid.
+        image: A PIL image object to convert.
+        title: The title of the image.
+        author: The name of the author of the image.
+        canvas: The type of canvas to use for the image.
+
+        Returns the created `JopMultiBlockImage` object or raises an error.
+        """
+        # Get the full image size
+        imageFullSize = image.size
+
+        # Calculate the tile size
+        tileSize = (imageFullSize[0] // gridSize[0], imageFullSize[1] // gridSize[1])
+
+        # Calculate the grid indicies
+        gridIndicies = tileGridIndices(imageFullSize, tileSize, startAtZero=True)
+
+        # Build the root painting id
+        rootId = cls.generatePaintingId(title, author)
+
+        # Load the segment grid
+        imageGrid: list[list[JopImage]] = [[None for _ in range(gridSize[0])] for _ in range(gridSize[1])]
+        curId = rootId
+        for y in range(gridSize[1]):
+            for x in range(gridSize[0]):
+                # Get the segment image
+                gridTopLeft = gridIndicies[y][x]
+                with image.crop((*gridTopLeft, gridTopLeft[0] + tileSize[0], gridTopLeft[1] + tileSize[1])) as segmentImage:
+                    # Convert to a JopImage
+                    jopSegment = JopImage.fromImage(
+                        segmentImage,
+                        canvas,
+                        f"{title} ({x}, {y})",
+                        author,
+                        name=f"{JopImage._ROOT_UUID}_{curId}"
+                    )
+
+                # Record the image in the grid
+                imageGrid[y][x] = jopSegment
+
+                # Increment the id
+                curId += 1
+
+        return cls(
+            author,
+            title,
+            imageGrid
+        )
+
+    @classmethod
     def fromImageFile(
         cls: "JopMultiBlockImage",
         gridSize: tuple[int, int],
@@ -52,59 +113,23 @@ class JopMultiBlockImage:
         """
         Loads a standard image file and converts its grid components into a set of Joy of Painting images.
 
-        path: The path to the image file.
         gridSize: The size of the grid as a tuple of `(width, height)` where each cell is a Joy of Painting Large Canvas. A size of `(2, 2)` would create a 4 Large Canvas grid.
+        path: The path to the image file.
         title: The title of the image.
         author: The name of the author of the image.
         canvas: The type of canvas to use for the image.
 
-        Returns the create `JopMultiBlockImage` object or raises an error.
+        Returns the created `JopMultiBlockImage` object or raises an error.
         """
-        # Expand the path
-        path = fullpath(path)
-
         # Load the full image
-        with Image.open(path) as imageFull:
-            # Get the full image size
-            imageFullSize = imageFull.size
-
-            # Calculate the tile size
-            tileSize = (imageFullSize[0] // gridSize[0], imageFullSize[1] // gridSize[1])
-
-            # Calculate the grid indicies
-            gridIndicies = tileGridIndices(imageFullSize, tileSize, startAtZero=True)
-
-            # Build the root painting id
-            rootId = cls.generatePaintingId(title, author)
-
-            # Load the segment grid
-            imageGrid: list[list[JopImage]] = [[None for _ in range(gridSize[0])] for _ in range(gridSize[1])]
-            curId = rootId
-            for y in range(gridSize[1]):
-                for x in range(gridSize[0]):
-                    # Get the segment image
-                    gridTopLeft = gridIndicies[y][x]
-                    with imageFull.crop((*gridTopLeft, gridTopLeft[0] + tileSize[0], gridTopLeft[1] + tileSize[1])) as segmentImage:
-                        # Convert to a JopImage
-                        jopSegment = JopImage.fromImage(
-                            segmentImage,
-                            canvas,
-                            f"{title} ({x}, {y})",
-                            author,
-                            name=f"{JopImage._ROOT_UUID}_{curId}"
-                        )
-
-                    # Record the image in the grid
-                    imageGrid[y][x] = jopSegment
-
-                    # Increment the id
-                    curId += 1
-
-        return cls(
-            author,
-            title,
-            imageGrid
-        )
+        with Image.open(fullpath(path)) as imageFull:
+            return cls.fromImage(
+                gridSize,
+                imageFull,
+                title,
+                author,
+                canvas=canvas
+            )
 
     # Python Functions
     def __str__(self) -> str:

@@ -122,7 +122,7 @@ class JopImage:
         name: Optional[str] = None
     ) -> "JopImage":
         """
-        Loads a standard image file and converts it to a Joy of Painting image.
+        Accepts a standard PIL image and converts it to a Joy of Painting image.
 
         image: A PIL Image object. For best results, input an image with dimensions that are a power of 2. The image will be resized to the nearest power of 2 before conversion if necessary.
         canvas: The type of canvas to use for the image. It is recommended to use a canvas type that matches the aspect ratio of the image.
@@ -206,11 +206,8 @@ class JopImage:
         if name is None:
             name = f"{cls._ROOT_UUID}_{int(time())}"
 
-        # Expand the path
-        path = fullpath(path)
-
         # Load the image
-        with Image.open(path) as image:
+        with Image.open(fullpath(path)) as image:
             # Load from the image
             return cls.fromImage(image, canvas, title, author, name=name)
 
