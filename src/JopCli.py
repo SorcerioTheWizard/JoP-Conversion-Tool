@@ -56,8 +56,14 @@ def runJopCli():
 
     # Execute command
     if args.command == _KEY_COMMAND_EXPORT:
+        # Define size
+        if args.size is None:
+            outSize = None
+        else:
+            outSize = tuple(args.size[0])
+
         # Export image
-        converter.exportImage(args.inPath, args.outPath, tuple(args.size[0]))
+        converter.exportImage(args.inPath, args.outPath, outSize)
     elif args.command == _KEY_COMMAND_IMPORT:
         # Attempt to get the canvas type
         canvasType = JopCanvasType[args.canvasType.upper()]
