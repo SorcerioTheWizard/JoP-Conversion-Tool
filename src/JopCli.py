@@ -21,7 +21,6 @@ def runJopCli():
     """
     # Create the parser
     parser = argparse.ArgumentParser(
-        prog="Joy of Painting Image Converter",
         description="Utility for conversion of images to the Joy of Painting `.paint` format and vice versa."
     )
 
