@@ -31,7 +31,7 @@ Large images can also be imported as a grid to increase the represented resoluti
 ## Usage
 
 1. Make sure you're in your Python virtual environment: `./.venv/Scripts/activate`.
-1. Run the command line interface with: `python run.py`.
+1. View the command line interface help text with: `python run.py -h`.
 
 You can now export existing `.paint` files into a normal image format or import any normal image into the `.paint` format to use in-game.
 
