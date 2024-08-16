@@ -6,3 +6,6 @@ test.png
 test.paint
 assets/*
 !assets/jopToolBanner_banner.jpg
+build/
+dist/
+*.spec
