@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Build Executable",
+			"command": "pyinstaller.exe --name JoPTool --onefile -i .\\assets\\jopToolBanner_primary_noText_transparent.ico .\\run.py",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": []
+		}
+	]
+}
