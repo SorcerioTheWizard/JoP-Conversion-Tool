@@ -1,15 +1,37 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "shell",
-			"label": "Build Executable",
-			"command": "pyinstaller.exe --name JoPTool --onefile -i .\\assets\\jopToolBanner_primary_noText_transparent.ico .\\run.py",
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"problemMatcher": []
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build Executable",
+            "command": "pyinstaller.exe --name JoPTool --onefile -i .\\assets\\jopToolBanner_primary_noText_transparent.ico .\\run.py",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Package Executable",
+            "command": "python.exe .\\pack.py",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build for Release",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Build Executable",
+                "Package Executable"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
 }
